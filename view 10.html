@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🀄 Mahjong Nights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mahjong Nights">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#cc1f8a;--red-light:#fce8f5;--red-dark:#96146a;
+  --gold:#f5a623;--gold-light:#fef3dc;--gold-dark:#c47d00;
+  --teal:#00b8a0;--teal-light:#d6f5f1;--teal-dark:#007a6b;
+  --purple:#7c4dff;--purple-light:#ede7ff;--purple-dark:#5a2fd4;
+  --orange:#f57c00;--orange-light:#fff0e0;
+  --navy:#1a1f3a;--cream:#fdf8f0;--white:#ffffff;
+  --text:#1a1f3a;--text-mid:#4a5080;--text-soft:#8890b8;
+  --shadow:0 4px 24px rgba(26,31,58,0.12);
+  --shadow-lg:0 8px 40px rgba(26,31,58,0.18);
+  --r:16px;--r-sm:10px;--r-xs:6px;
+  --font:'Outfit',sans-serif;
+  --yes:#00b8a0;--yes-light:#d6f5f1;
+  --no:#cc1f8a;--no-light:#fce8f5;
+  --maybe:#f5a623;--maybe-light:#fef3dc;
+  --none:#8890b8;--none-light:#f0f0f5;
+}
+body{font-family:var(--font);background:var(--cream);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle at 15% 20%,rgba(124,77,255,0.07) 0%,transparent 50%),
+    radial-gradient(circle at 85% 80%,rgba(0,184,160,0.07) 0%,transparent 50%),
+    radial-gradient(circle at 50% 50%,rgba(204,31,138,0.04) 0%,transparent 60%);}
+.wrap{max-width:700px;margin:0 auto;padding:0 1rem 3rem;position:relative;z-index:1}
+.header{padding:2rem 0 1.5rem;text-align:center}
+.header-art{margin-bottom:1rem}
+.header h1{font-size:28px;font-weight:700;color:#ff1493;letter-spacing:-0.5px;font-family:'Playfair Display',serif;font-style:italic}
+.header p{font-size:14px;color:var(--text-soft);margin-top:4px}
+.view-only-badge{display:inline-flex;align-items:center;gap:6px;background:var(--purple-light);color:var(--purple-dark);font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;margin-top:10px}
+/* tabs */
+.tabs{display:flex;gap:8px;margin-bottom:1.5rem;background:var(--white);border-radius:var(--r);padding:6px;box-shadow:var(--shadow)}
+.tab{flex:1;padding:10px 8px;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all 0.2s;color:var(--text-soft);background:transparent;display:flex;align-items:center;justify-content:center;gap:6px}
+.tab.active.t-nights{background:var(--red);color:var(--white);box-shadow:0 2px 12px rgba(204,31,138,0.35)}
+.tab.active.t-calendar{background:var(--purple);color:var(--white);box-shadow:0 2px 12px rgba(124,77,255,0.35)}
+.tab:hover:not(.active){background:var(--cream);color:var(--text)}
+.tab-badge{background:rgba(255,255,255,0.3);border-radius:20px;padding:1px 7px;font-size:11px;font-weight:700}
+.tab:not(.active) .tab-badge{background:var(--cream);color:var(--text-soft)}
+.section{display:none}.section.active{display:block}
+/* section headers */
+.sec-header{display:flex;align-items:center;gap:12px;margin-bottom:1.25rem}
+.sec-icon{width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sec-icon.red{background:var(--red-light);color:var(--red)}
+.sec-header h2{font-size:18px;font-weight:700;color:var(--navy)}
+.sec-header p{font-size:13px;color:var(--text-soft);margin-top:1px}
+/* night cards */
+.nights-list{display:flex;flex-direction:column;gap:12px;margin-bottom:1rem}
+.night-card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;transition:transform 0.18s,box-shadow 0.18s;cursor:pointer}
+.night-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.night-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(26,31,58,0.06)}
+.night-date{font-size:15px;font-weight:700;color:var(--navy);flex:1}
+.night-host{font-size:12px;color:var(--text-soft);display:flex;align-items:center;gap:4px}
+.night-stats{display:flex;gap:6px;padding:10px 16px;flex-wrap:wrap}
+.stat-pill{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px}
+.stat-pill.yes{background:var(--yes-light);color:var(--yes)}
+.stat-pill.no{background:var(--no-light);color:var(--no)}
+.stat-pill.maybe{background:var(--maybe-light);color:var(--maybe)}
+.stat-pill.none{background:var(--none-light);color:var(--none)}
+.night-notes{font-size:12px;color:var(--text-soft);padding:0 16px 12px;line-height:1.4}
+/* attendance modal (read only) */
+.modal-bg{position:fixed;inset:0;background:rgba(26,31,58,0.55);display:flex;align-items:flex-end;justify-content:center;z-index:200;visibility:hidden;opacity:0;transition:opacity 0.2s,visibility 0.2s;backdrop-filter:blur(3px)}
+.modal-bg.open{visibility:visible;opacity:1}
+.modal{background:var(--white);border-radius:20px 20px 0 0;padding:1.75rem;width:100%;max-width:500px;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:rgba(26,31,58,0.15);border-radius:2px;margin:0 auto 1.25rem}
+.modal-title{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.modal-subtitle{font-size:13px;color:var(--text-soft);margin-bottom:1.25rem}
+.modal-btns{display:flex;gap:8px;margin-top:1.5rem}
+.modal-btns button{flex:1;padding:12px;border-radius:var(--r-sm);cursor:pointer;font-size:14px;font-weight:700;font-family:var(--font);transition:all 0.18s}
+.btn-cancel{background:transparent;border:2px solid rgba(26,31,58,0.12);color:var(--text-soft)}
+.btn-cancel:hover{background:var(--cream)}
+/* attendance read-only rows */
+.att-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(26,31,58,0.06)}
+.att-row:last-child{border-bottom:none}
+.att-name{flex:1;font-size:14px;font-weight:600;color:var(--navy)}
+.att-status-pill{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:5px}
+.att-status-pill.yes{background:var(--yes-light);color:var(--yes)}
+.att-status-pill.no{background:var(--no-light);color:var(--no)}
+.att-status-pill.maybe{background:var(--maybe-light);color:var(--maybe)}
+.att-status-pill.none{background:var(--none-light);color:var(--none)}
+/* calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-month{font-size:18px;font-weight:700;color:var(--navy)}
+.cal-nav-btn{background:none;border:1.5px solid rgba(26,31,58,0.15);border-radius:var(--r-xs);padding:6px 12px;cursor:pointer;font-size:16px;color:var(--text-mid);font-family:var(--font);transition:all 0.15s}
+.cal-nav-btn:hover{background:var(--cream)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:1.5rem}
+.cal-day-header{text-align:center;font-size:11px;font-weight:700;color:var(--text-soft);padding:6px 0;text-transform:uppercase}
+.cal-day{min-height:44px;border-radius:var(--r-xs);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;position:relative;padding:4px}
+.cal-day.other-month{opacity:0.3}
+.cal-day.today .cal-day-num{background:var(--red);color:var(--white);border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center}
+.cal-day.has-night{background:var(--purple-light);cursor:pointer;border-radius:var(--r-xs)}
+.cal-day.has-night:hover{background:var(--purple);color:var(--white)}
+.cal-day.has-night:hover .cal-day-num{color:var(--white)}
+.cal-day-num{font-size:14px;font-weight:600;color:var(--navy)}
+.cal-dot{width:6px;height:6px;border-radius:50%;background:var(--purple);margin-top:2px}
+.cal-day.has-night:hover .cal-dot{background:var(--white)}
+.cal-upcoming{margin-top:0.5rem}
+.cal-upcoming-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-soft);margin-bottom:0.75rem}
+.cal-event-card{background:var(--white);border-radius:var(--r-sm);box-shadow:var(--shadow);padding:12px 16px;margin-bottom:8px;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;border-left:4px solid var(--purple)}
+.cal-event-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.cal-event-date{font-size:12px;font-weight:700;color:var(--purple);margin-bottom:3px}
+.cal-event-host{font-size:13px;color:var(--text-soft);display:flex;align-items:center;gap:4px;margin-bottom:5px}
+.cal-event-pills{display:flex;gap:4px;flex-wrap:wrap}
+/* empty */
+.empty{text-align:center;padding:3rem 1rem}
+.empty-icon{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:30px}
+.empty-icon.red{background:var(--red-light)}
+.empty h3{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.empty p{font-size:13px;color:var(--text-soft);line-height:1.5}
+.tile-deco{font-size:1.4rem;line-height:1;opacity:0.15;position:fixed;pointer-events:none;z-index:0;user-select:none}
+.loading-msg{text-align:center;padding:3rem 1rem;color:var(--text-soft);font-size:14px}
+.search-wrap{position:relative;margin-bottom:1rem}
+.search-wrap .s-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--text-soft);pointer-events:none}
+.search-wrap input{width:100%;padding:11px 12px 11px 40px;border:2px solid transparent;border-radius:var(--r-sm);background:var(--white);font-size:14px;font-family:var(--font);color:var(--text);box-shadow:var(--shadow);outline:none;transition:border-color 0.2s}
+.search-wrap input:focus{border-color:var(--red)}
+.search-wrap input::placeholder{color:var(--text-soft)}
+.search-filter-row{display:flex;gap:8px;margin-bottom:1rem}
+.search-filter-select{flex:0 0 130px;font-size:13px;padding:11px 10px;border:2px solid transparent;border-radius:var(--r-sm);background:var(--white);color:var(--text);font-family:var(--font);outline:none;box-shadow:var(--shadow);transition:border-color 0.2s}
+.search-filter-select:focus{border-color:var(--red)}
+.search-result-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin-top:6px}
+.rsvp-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(26,31,58,0.06)}
+.rsvp-row:last-child{border-bottom:none}
+.rsvp-name{flex:1;font-size:14px;font-weight:600;color:var(--navy)}
+.rsvp-btns{display:flex;gap:4px}
+.rsvp-btn{padding:5px 10px;border-radius:20px;border:2px solid;cursor:pointer;font-size:11px;font-weight:700;font-family:var(--font);transition:all 0.15s;white-space:nowrap}
+.rsvp-btn.yes{border-color:var(--yes);color:var(--yes);background:transparent}
+.rsvp-btn.yes.active,.rsvp-btn.yes:hover{background:var(--yes);color:var(--white)}
+.rsvp-btn.maybe{border-color:var(--maybe);color:var(--maybe);background:transparent}
+.rsvp-btn.maybe.active,.rsvp-btn.maybe:hover{background:var(--maybe);color:var(--white)}
+.rsvp-btn.no{border-color:var(--no);color:var(--no);background:transparent}
+.rsvp-btn.no.active,.rsvp-btn.no:hover{background:var(--no);color:var(--white)}
+.rsvp-saved-msg{font-size:11px;color:var(--yes);font-weight:600;margin-left:6px;opacity:0;transition:opacity 0.3s}
+.rsvp-saved-msg.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="tile-deco" style="top:5%;left:2%;font-size:3rem;transform:rotate(-15deg)">🀇</div>
+<div class="tile-deco" style="top:60%;right:2%;font-size:3rem;transform:rotate(20deg)">🀀</div>
+<div class="tile-deco" style="bottom:15%;left:3%;font-size:2.5rem;transform:rotate(5deg)">🀃</div>
+
+<div class="wrap">
+  <div class="header">
+    <div class="header-art">
+      <svg width="280" height="110" viewBox="0 0 380 140">
+        <path d="M 10,70 Q 20,45 40,55 Q 60,65 50,80 Q 40,95 25,85" fill="none" stroke="#00b8a0" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 25,85 Q 15,80 18,72 Q 21,64 30,68" fill="none" stroke="#00b8a0" stroke-width="1.5" stroke-linecap="round"/>
+        <ellipse cx="42" cy="44" rx="7" ry="4" fill="#ff1493" transform="rotate(-30 42 44)"/>
+        <ellipse cx="60" cy="60" rx="6" ry="3.5" fill="#7c4dff" transform="rotate(15 60 60)"/>
+        <circle cx="8" cy="72" r="2.5" fill="#00b8a0"/>
+        <path d="M 58,68 Q 68,60 78,68 Q 88,76 98,68 Q 108,60 118,68 Q 128,76 138,70" fill="none" stroke="#ff1493" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="78" cy="68" r="2" fill="#7c4dff"/>
+        <circle cx="98" cy="68" r="2" fill="#00b8a0"/>
+        <circle cx="118" cy="68" r="2" fill="#7c4dff"/>
+        <path d="M 370,70 Q 360,45 340,55 Q 320,65 330,80 Q 340,95 355,85" fill="none" stroke="#00b8a0" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 355,85 Q 365,80 362,72 Q 359,64 350,68" fill="none" stroke="#00b8a0" stroke-width="1.5" stroke-linecap="round"/>
+        <ellipse cx="338" cy="44" rx="7" ry="4" fill="#ff1493" transform="rotate(30 338 44)"/>
+        <ellipse cx="320" cy="60" rx="6" ry="3.5" fill="#7c4dff" transform="rotate(-15 320 60)"/>
+        <circle cx="372" cy="72" r="2.5" fill="#00b8a0"/>
+        <path d="M 322,68 Q 312,60 302,68 Q 292,76 282,68 Q 272,60 262,68 Q 252,76 242,70" fill="none" stroke="#ff1493" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="302" cy="68" r="2" fill="#7c4dff"/>
+        <circle cx="282" cy="68" r="2" fill="#00b8a0"/>
+        <circle cx="262" cy="68" r="2" fill="#7c4dff"/>
+        <line x1="190" y1="8" x2="190" y2="22" stroke="#cc1f8a" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="190" cy="6" r="3" fill="#ff1493"/>
+        <polygon points="172,30 190,18 208,30" fill="#00b8a0"/>
+        <polygon points="169,33 190,23 211,33" fill="#007a6b"/>
+        <rect x="178" y="33" width="24" height="16" rx="2" fill="#ff1493"/>
+        <polygon points="160,55 190,43 220,55" fill="#00b8a0"/>
+        <polygon points="156,59 190,47 224,59" fill="#007a6b"/>
+        <rect x="170" y="59" width="40" height="18" rx="2" fill="#fce8f5"/>
+        <polygon points="140,88 190,73 240,88" fill="#00b8a0"/>
+        <polygon points="134,93 190,77 246,93" fill="#007a6b"/>
+        <rect x="158" y="93" width="64" height="24" rx="2" fill="#fce8f5"/>
+        <rect x="164" y="117" width="52" height="7" rx="2" fill="#7c4dff"/>
+        <rect x="154" y="124" width="72" height="7" rx="2" fill="#5a2fd4"/>
+        <rect x="144" y="131" width="92" height="6" rx="2" fill="#ede7ff"/>
+      </svg>
+    </div>
+    <h1>Mahjong Nights</h1>
+    <p>Track attendance for every game night</p>
+    <div class="view-only-badge"><i class="ti ti-edit"></i> RSVP Only</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab t-nights active" id="tab-btn-nights"><i class="ti ti-calendar-event"></i> Nights <span class="tab-badge" id="nights-badge"></span></button>
+    <button class="tab t-calendar" id="tab-btn-calendar"><i class="ti ti-calendar"></i> Calendar</button>
+  </div>
+
+  <!-- NIGHTS -->
+  <div id="tab-nights" class="section active">
+    <div class="sec-header">
+      <div class="sec-icon red"><i class="ti ti-calendar-event"></i></div>
+      <div><h2>Upcoming Game Nights</h2><p>Tap a night to see attendance details</p></div>
+    </div>
+    <div class="search-filter-row">
+      <select class="search-filter-select" id="nights-search-filter">
+        <option value="all">Search All</option>
+        <option value="attendance">By Attendance</option>
+        <option value="host">By Host</option>
+        <option value="location">By Location</option>
+      </select>
+      <div class="search-wrap" style="flex:1;margin-bottom:0">
+        <i class="ti ti-search s-icon"></i>
+        <input type="text" id="nights-search" placeholder="Search…">
+      </div>
+    </div>
+    <div class="nights-list" id="nights-list"></div>
+    <div class="empty" id="nights-empty" style="display:none">
+      <div class="empty-icon red"><i class="ti ti-calendar-event"></i></div>
+      <h3>No upcoming nights</h3>
+      <p>Check back soon — nothing scheduled yet!</p>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="tab-calendar" class="section">
+    <div class="sec-header">
+      <div class="sec-icon" style="background:var(--purple-light);color:var(--purple)"><i class="ti ti-calendar"></i></div>
+      <div><h2>Calendar</h2><p>Tap a highlighted date to see details</p></div>
+    </div>
+    <div class="cal-nav">
+      <button class="cal-nav-btn" id="cal-prev">‹</button>
+      <div class="cal-month" id="cal-month-label"></div>
+      <button class="cal-nav-btn" id="cal-next">›</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-upcoming">
+      <div class="cal-upcoming-title">Upcoming Nights</div>
+      <div id="cal-month-nights"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ATTENDANCE MODAL (read-only) -->
+<div class="modal-bg" id="att-modal-bg">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="att-modal-title">Game Night</div>
+    <div class="modal-subtitle" id="att-modal-subtitle"></div>
+    <div id="att-modal-body"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" id="att-modal-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State (read-only) ───────────────────────────────────
+const SUPABASE_URL = 'https://roeuahrhqshwhbtmqwtg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6_DivpGVt6mdob1SrX5L8g_Vd6QOACf';
+const RECORD_ID = 'mahjong_nights';
+
+let state = { players:[], nights:[] };
+
+async function load(){
+  try{
+    const r = await fetch(SUPABASE_URL+'/rest/v1/collection?id=eq.'+RECORD_ID,{
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY}
+    });
+    if(r.ok){
+      const rows = await r.json();
+      if(rows.length>0){ const p=JSON.parse(rows[0].data); state={players:[],nights:[],...p}; return; }
+    }
+  }catch(e){ console.warn('Load error:',e); }
+}
+
+async function saveRSVP(){
+  try{
+    const json = JSON.stringify(state);
+    const patch = await fetch(SUPABASE_URL+'/rest/v1/collection?id=eq.'+RECORD_ID,{
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({data:json})
+    });
+  }catch(e){ console.warn('RSVP save error:',e); }
+}
+
+function todayStr(){
+  const t=new Date();
+  return t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+}
+
+function fmtDate(d){
+  if(!d) return '';
+  const [y,m,day]=d.split('-');
+  return new Date(y,m-1,day).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+}
+
+// ── Tabs ───────────────────────────────────────────────
+document.getElementById('tab-btn-nights').addEventListener('click',()=>showTab('nights'));
+document.getElementById('tab-btn-calendar').addEventListener('click',()=>showTab('calendar'));
+document.getElementById('nights-search').addEventListener('input',renderNights);
+document.getElementById('nights-search-filter').addEventListener('change',function(){
+  const placeholders = {
+    all: 'Search by date, host, location…',
+    attendance: "Enter a player's name…",
+    host: "Enter the host's name…",
+    location: 'Enter a location…'
+  };
+  document.getElementById('nights-search').placeholder = placeholders[this.value]||'Search…';
+  renderNights();
+});
+
+function showTab(name){
+  ['nights','calendar'].forEach(t=>{
+    document.getElementById('tab-btn-'+t).classList.toggle('active',t===name);
+    document.getElementById('tab-'+t).classList.toggle('active',t===name);
+  });
+  if(name==='nights') renderNights();
+  else renderCalendar();
+}
+
+function updateBadges(){
+  const today = todayStr();
+  const upcomingCount = state.nights.filter(n=>n.date >= today).length;
+  document.getElementById('nights-badge').textContent=upcomingCount||'';
+}
+
+// ── Nights (read-only) ──────────────────────────────────
+function renderNights(){
+  const list = document.getElementById('nights-list');
+  const empty = document.getElementById('nights-empty');
+  updateBadges();
+  const today = todayStr();
+  const q = (document.getElementById('nights-search')?.value||'').toLowerCase().trim();
+  const filterType = document.getElementById('nights-search-filter')?.value||'all';
+  let sorted = [...state.nights]
+    .filter(n=>n.date >= today)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+
+  let matchedStatus = {}; // nightId -> status, used when filtering by attendance
+
+  if(q){
+    sorted = sorted.filter(n=>{
+      if(filterType==='host'){
+        return (n.host||'').toLowerCase().includes(q);
+      }
+      if(filterType==='location'){
+        return (n.location||'').toLowerCase().includes(q);
+      }
+      if(filterType==='attendance'){
+        const att = n.attendance||{};
+        const matchedPlayer = state.players.find(p=>p.name.toLowerCase().includes(q));
+        if(!matchedPlayer) return false;
+        if(!(n.playerIds||[]).includes(matchedPlayer.id)) return false;
+        matchedStatus[n.id] = att[matchedPlayer.id]||'none';
+        return true;
+      }
+      // 'all'
+      const playerNames = (n.playerIds||[]).map(pid=>state.players.find(p=>p.id===pid)?.name||'').join(' ');
+      return [fmtDate(n.date), n.host||'', n.location||'', n.notes||'', playerNames].some(s=>s.toLowerCase().includes(q));
+    });
+  }
+
+  if(!sorted.length){ list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  list.innerHTML='';
+  sorted.forEach(night=>{
+    const att = night.attendance||{};
+    const counts = {yes:0,no:0,maybe:0,none:0};
+    (night.playerIds||[]).forEach(pid=>{
+      const s=att[pid]||'none';
+      counts[s]=(counts[s]||0)+1;
+    });
+    const card=document.createElement('div');
+    card.className='night-card';
+    card.innerHTML=`
+      <div class="night-header">
+        <div style="flex:1">
+          <div class="night-date">${fmtDate(night.date)}</div>
+          ${night.host?`<div class="night-host"><i class="ti ti-home" style="font-size:11px"></i> Hosted by ${night.host}</div>`:''}
+        </div>
+      </div>
+      <div class="night-stats">
+        ${counts.yes?`<span class="stat-pill yes"><i class="ti ti-check" style="font-size:11px"></i> ${counts.yes} Yes</span>`:''}
+        ${counts.maybe?`<span class="stat-pill maybe"><i class="ti ti-question-mark" style="font-size:11px"></i> ${counts.maybe} Maybe</span>`:''}
+        ${counts.no?`<span class="stat-pill no"><i class="ti ti-x" style="font-size:11px"></i> ${counts.no} No</span>`:''}
+        ${counts.none?`<span class="stat-pill none"><i class="ti ti-clock" style="font-size:11px"></i> ${counts.none} No response</span>`:''}
+      </div>
+      ${night.location||night.addressStreet||night.addressCity?`<div class="night-notes"><i class="ti ti-map-pin" style="font-size:11px"></i> ${night.location||''}${(night.location&&(night.addressStreet||night.addressCity))?'<br>&nbsp;&nbsp;&nbsp;&nbsp;':''}${night.addressStreet||''}${night.addressStreet&&night.addressCity?'<br>&nbsp;&nbsp;&nbsp;&nbsp;':''}${night.addressCity||''}</div>`:''}
+      ${night.setsBy&&night.setsBy.length?`<div class="night-notes"><i class="ti ti-cards" style="font-size:11px"></i> Sets: ${night.setsBy.map(pid=>state.players.find(p=>p.id===pid)?.name||'?').join(', ')}</div>`:''}
+      ${night.notes?`<div class="night-notes">${night.notes}</div>`:''}
+      ${matchedStatus[night.id]?`<div style="padding:0 16px 12px"><span class="att-status-pill ${matchedStatus[night.id]}"><i class="ti ${({yes:'ti-check',maybe:'ti-question-mark',no:'ti-x',none:'ti-clock'})[matchedStatus[night.id]]}" style="font-size:11px"></i> ${({yes:'Coming',maybe:'Maybe',no:'Not Coming',none:'No Response'})[matchedStatus[night.id]]}</span></div>`:''}`;
+    card.addEventListener('click',()=>openAttModal(night.id));
+    list.appendChild(card);
+  });
+}
+
+// ── Attendance Modal (read-only) ────────────────────────
+const attModalBg = document.getElementById('att-modal-bg');
+attModalBg.addEventListener('click',e=>{ if(e.target===attModalBg) closeAttModal(); });
+document.getElementById('att-modal-close').addEventListener('click',closeAttModal);
+
+let currentNightId = null;
+
+function closeAttModal(){ attModalBg.classList.remove('open'); renderNights(); renderCalendar(); }
+
+function openAttModal(nightId){
+  currentNightId = nightId;
+  const night = state.nights.find(n=>n.id===nightId);
+  if(!night) return;
+  if(!night.attendance) night.attendance={};
+
+  document.getElementById('att-modal-title').textContent = fmtDate(night.date);
+  let subtitle = night.host ? 'Hosted by '+night.host : '';
+  if(night.location) subtitle += (subtitle?' · ':'')+night.location;
+  let addressLine = '';
+  if(night.addressStreet || night.addressCity){
+    addressLine = '<br>'+[night.addressStreet,night.addressCity].filter(Boolean).join('<br>');
+  }
+  subtitle += (subtitle?' · ':'')+'Tap a button below to RSVP';
+  document.getElementById('att-modal-subtitle').innerHTML = subtitle + addressLine;
+
+  const body = document.getElementById('att-modal-body');
+  body.innerHTML='';
+
+  // Sort invited players alphabetically by name
+  const invited = (night.playerIds||[])
+    .map(pid=>state.players.find(p=>p.id===pid))
+    .filter(Boolean)
+    .sort((a,b)=>a.name.localeCompare(b.name));
+
+  invited.forEach(player=>{
+    const current = night.attendance[player.id]||'none';
+    const row = document.createElement('div');
+    row.className='rsvp-row';
+    row.innerHTML=`
+      <div class="rsvp-name">${player.name}</div>
+      <div class="rsvp-btns">
+        <button class="rsvp-btn yes${current==='yes'?' active':''}" data-status="yes">✅ Yes</button>
+        <button class="rsvp-btn maybe${current==='maybe'?' active':''}" data-status="maybe">🤔 Maybe</button>
+        <button class="rsvp-btn no${current==='no'?' active':''}" data-status="no">❌ No</button>
+      </div>
+      <span class="rsvp-saved-msg">Saved!</span>`;
+    row.querySelectorAll('.rsvp-btn').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        const status=this.dataset.status;
+        night.attendance[player.id]=status;
+        row.querySelectorAll('.rsvp-btn').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        saveRSVP();
+        const msg = row.querySelector('.rsvp-saved-msg');
+        msg.classList.add('show');
+        setTimeout(()=>msg.classList.remove('show'), 1500);
+      });
+    });
+    body.appendChild(row);
+  });
+
+  if(night.setsBy && night.setsBy.length){
+    const setsDiv = document.createElement('div');
+    setsDiv.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid rgba(26,31,58,0.08);font-size:13px;color:var(--text-soft)';
+    setsDiv.innerHTML='<i class="ti ti-cards" style="font-size:12px"></i> Bringing sets: '+night.setsBy.map(pid=>state.players.find(p=>p.id===pid)?.name||'?').join(', ');
+    body.appendChild(setsDiv);
+  }
+
+  if(night.notes){
+    const notesDiv = document.createElement('div');
+    notesDiv.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid rgba(26,31,58,0.08);font-size:13px;color:var(--text-soft);line-height:1.5';
+    notesDiv.textContent=night.notes;
+    body.appendChild(notesDiv);
+  }
+
+  attModalBg.classList.add('open');
+}
+
+// ── Calendar (read-only) ────────────────────────────────
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+document.getElementById('cal-prev').addEventListener('click',()=>{ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); });
+document.getElementById('cal-next').addEventListener('click',()=>{ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); });
+
+function renderCalendar(){
+  const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dayNames=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  document.getElementById('cal-month-label').textContent=monthNames[calMonth]+' '+calYear;
+
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+
+  dayNames.forEach(d=>{
+    const h=document.createElement('div');
+    h.className='cal-day-header';
+    h.textContent=d;
+    grid.appendChild(h);
+  });
+
+  const today=new Date();
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev=new Date(calYear,calMonth,0).getDate();
+
+  const nightDates={};
+  state.nights.forEach(n=>{ if(n.date) nightDates[n.date]=n; });
+
+  for(let i=firstDay-1;i>=0;i--){
+    const d=document.createElement('div');
+    d.className='cal-day other-month';
+    d.innerHTML=`<span class="cal-day-num">${daysInPrev-i}</span>`;
+    grid.appendChild(d);
+  }
+
+  for(let day=1;day<=daysInMonth;day++){
+    const dateStr=calYear+'-'+(String(calMonth+1).padStart(2,'0'))+'-'+(String(day).padStart(2,'0'));
+    const night=nightDates[dateStr];
+    const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===day;
+    const d=document.createElement('div');
+    d.className='cal-day'+(night?' has-night':'')+(isToday?' today':'');
+    d.innerHTML=`<span class="cal-day-num">${day}</span>${night?'<div class="cal-dot"></div>':''}`;
+    if(night) d.addEventListener('click',()=>openAttModal(night.id));
+    grid.appendChild(d);
+  }
+
+  const total=firstDay+daysInMonth;
+  const remaining=(7-total%7)%7;
+  for(let i=1;i<=remaining;i++){
+    const d=document.createElement('div');
+    d.className='cal-day other-month';
+    d.innerHTML=`<span class="cal-day-num">${i}</span>`;
+    grid.appendChild(d);
+  }
+
+  const monthNights_container=document.getElementById('cal-month-nights');
+  const todayS = todayStr();
+  const upcomingNights=state.nights
+    .filter(n=>n.date && n.date >= todayS)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+
+  if(!upcomingNights.length){
+    monthNights_container.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--text-soft);font-size:13px">No upcoming nights scheduled.</div>';
+    return;
+  }
+  monthNights_container.innerHTML='';
+  upcomingNights.forEach(night=>{
+    const att=night.attendance||{};
+    const counts={yes:0,no:0,maybe:0,none:0};
+    (night.playerIds||[]).forEach(pid=>{ const s=att[pid]||'none'; counts[s]=(counts[s]||0)+1; });
+    const card=document.createElement('div');
+    card.className='cal-event-card';
+    card.innerHTML=`
+      <div class="cal-event-date">${fmtDate(night.date)}</div>
+      ${night.host?`<div class="cal-event-host"><i class="ti ti-home" style="font-size:11px"></i> ${night.host}</div>`:''}
+      <div class="cal-event-pills">
+        ${counts.yes?`<span class="stat-pill yes"><i class="ti ti-check" style="font-size:10px"></i> ${counts.yes} Yes</span>`:''}
+        ${counts.maybe?`<span class="stat-pill maybe"><i class="ti ti-question-mark" style="font-size:10px"></i> ${counts.maybe} Maybe</span>`:''}
+        ${counts.no?`<span class="stat-pill no"><i class="ti ti-x" style="font-size:10px"></i> ${counts.no} No</span>`:''}
+        ${counts.none?`<span class="stat-pill none"><i class="ti ti-clock" style="font-size:10px"></i> ${counts.none} No response</span>`:''}
+      </div>`;
+    card.addEventListener('click',()=>openAttModal(night.id));
+    monthNights_container.appendChild(card);
+  });
+}
+
+// ── Init ───────────────────────────────────────────────
+function openNightFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  const nightId = params.get('night');
+  if(nightId && state.nights.find(n=>n.id===nightId)){
+    showTab('nights');
+    openAttModal(nightId);
+  }
+}
+
+load().then(()=>{
+  renderNights();
+  renderCalendar();
+  updateBadges();
+  openNightFromURL();
+}).catch(()=>{
+  renderNights();
+  renderCalendar();
+  updateBadges();
+  openNightFromURL();
+});
+</script>
+</body>
+</html>
